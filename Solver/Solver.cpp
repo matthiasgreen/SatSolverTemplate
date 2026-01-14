@@ -1,92 +1,103 @@
 /**
-* @author Tim Luchterhand
-* @date 27.11.24
-* @brief
-*/
+ * @author Tim Luchterhand
+ * @date 27.11.24
+ * @brief
+ */
 
 #include "Solver.hpp"
+#include "basic_structures.hpp"
 #include "util/exception.hpp"
+#include <cstddef>
+#include <vector>
 
 namespace sat {
-    Solver::Solver(unsigned numVariables) {
-        throw NOT_IMPLEMENTED;
+
+Assignments::Assignments(unsigned numVariables) {
+    assignments = std::vector<TruthValue>(numVariables, TruthValue::Undefined);
+}
+
+TruthValue Assignments::operator[](Variable var) const {
+    return assignments[size_t(var.get())];
+}
+
+Solver::Solver(unsigned numVariables) {
+    assignments = Assignments(numVariables);
+}
+
+bool Solver::addClause(Clause clause) {
+    if (clause.isEmpty()) {
+        return false;
+    } else if (clause.size() == 1) {
+        auto sign = TruthValue(clause[0].sign());
+        auto value = assignments[size_t(clause[0].get())];
+        if (value != TruthValue::Undefined && sign != value) {
+            return false;
+        }
     }
+    clauses.push_back(clause);
+    return true;
+}
 
-    bool Solver::addClause(Clause clause) {
-        throw NOT_IMPLEMENTED;
-    }
-
-    /**
-     * Here you have a possible implementation of the rebase-method. It should work out of the box.
-     * To use it, remove the throw-expression and un-comment the code below. The implementation requires that
-     * your solver has some sort of container of pointer types to clause called 'clauses'
-     * (e.g. std::vector<ClausePointer>). Additionally, your solver needs to have a container of unit literals
-     * called 'unitLiterals'.
-     */
-    auto Solver::rebase() const -> std::vector<Clause> {
-        throw NOT_IMPLEMENTED;
-        /*
-        std::vector<Clause> reducedClauses;
-        // We check all clauses in the solver. If the clause is SAT (at least one literal is satisfied), we don't include it.
-        // Additionally, we remove all falsified literals from the clauses since we only care about unassigned literals.
-        for (const auto &c: clauses) {
-            bool sat = false;
-            // We're creating a new (possibly smaller clause from the current clause c)
-            std::vector<Literal> newLits;
-            newLits.reserve(c->size());
-            // For each literal l in the clause we check if l is satisfied or falsified
-            for (auto l: *c) {
-                if (satisfied(l)) {
-                    // in this case, the whole clause is satisfied and can be removed entirely from the solver
-                    sat = true;
-                    break;
-                }
-
-                if (!falsified(l)) {
-                    // only unassigned literals are added to the reduced clause
-                    newLits.emplace_back(l);
-                }
+/**
+ * Here you have a possible implementation of the rebase-method. It should work
+ * out of the box. To use it, remove the throw-expression and un-comment the
+ * code below. The implementation requires that your solver has some sort of
+ * container of pointer types to clause called 'clauses' (e.g.
+ * std::vector<ClausePointer>). Additionally, your solver needs to have a
+ * container of unit literals called 'unitLiterals'.
+ */
+auto Solver::rebase() const -> std::vector<Clause> {
+    throw NOT_IMPLEMENTED;
+    /*
+    std::vector<Clause> reducedClauses;
+    // We check all clauses in the solver. If the clause is SAT (at least one
+    literal is satisfied), we don't include it.
+    // Additionally, we remove all falsified literals from the clauses since we
+    only care about unassigned literals. for (const auto &c: clauses) { bool sat
+    = false;
+        // We're creating a new (possibly smaller clause from the current clause
+    c) std::vector<Literal> newLits; newLits.reserve(c->size());
+        // For each literal l in the clause we check if l is satisfied or
+    falsified for (auto l: *c) { if (satisfied(l)) {
+                // in this case, the whole clause is satisfied and can be
+    removed entirely from the solver sat = true; break;
             }
 
-            if (!sat) {
-                // create the new clause (move all the literals inside the Clause-class)
-                Clause newClause(std::move(newLits));
-                // Check if we already added an equivalent clause
-                auto res = std::ranges::find_if(reducedClauses, [&newClause](const auto &clause) {
-                    return clause.sameLiterals(newClause);
-                });
-                if (res == reducedClauses.end()) {
-                    // The new clause is not yet contained => add it
-                    reducedClauses.emplace_back(std::move(newClause));
-                }
+            if (!falsified(l)) {
+                // only unassigned literals are added to the reduced clause
+                newLits.emplace_back(l);
             }
         }
 
-        // Finally, we need to add all the unit literals as well
-        for (Literal l: unitLiterals) {
-            reducedClauses.emplace_back(std::vector{l});
+        if (!sat) {
+            // create the new clause (move all the literals inside the
+    Clause-class) Clause newClause(std::move(newLits));
+            // Check if we already added an equivalent clause
+            auto res = std::ranges::find_if(reducedClauses, [&newClause](const
+    auto &clause) { return clause.sameLiterals(newClause);
+            });
+            if (res == reducedClauses.end()) {
+                // The new clause is not yet contained => add it
+                reducedClauses.emplace_back(std::move(newClause));
+            }
         }
-
-        return reducedClauses;*/
     }
 
-    TruthValue Solver::val(Variable x) const {
-        throw NOT_IMPLEMENTED;
+    // Finally, we need to add all the unit literals as well
+    for (Literal l: unitLiterals) {
+        reducedClauses.emplace_back(std::vector{l});
     }
 
-    bool Solver::satisfied(Literal l) const {
-        throw NOT_IMPLEMENTED;
-    }
+    return reducedClauses;*/
+}
 
-    bool Solver::falsified(Literal l) const {
-        throw NOT_IMPLEMENTED;
-    }
+TruthValue Solver::val(Variable x) const { throw NOT_IMPLEMENTED; }
 
-    bool Solver::assign(Literal l) {
-        throw NOT_IMPLEMENTED;
-    }
+bool Solver::satisfied(Literal l) const { throw NOT_IMPLEMENTED; }
 
-    bool Solver::unitPropagate() {
-        throw NOT_IMPLEMENTED;
-    }
-} // sat
+bool Solver::falsified(Literal l) const { throw NOT_IMPLEMENTED; }
+
+bool Solver::assign(Literal l) { throw NOT_IMPLEMENTED; }
+
+bool Solver::unitPropagate() { throw NOT_IMPLEMENTED; }
+} // namespace sat

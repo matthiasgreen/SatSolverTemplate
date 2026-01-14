@@ -9,6 +9,7 @@
 #define SOLVER_HPP
 
 #include <memory>
+#include <vector>
 
 #include "basic_structures.hpp"
 #include "Clause.hpp"
@@ -23,12 +24,21 @@ namespace sat {
     using ClausePointer = std::shared_ptr<Clause>;
     using ConstClausePointer = std::shared_ptr<const Clause>;
 
+    class Assignments {
+        std::vector<TruthValue> assignments;
+    public:
+        Assignments(unsigned numVariables);
+        TruthValue operator[](Variable var) const;
+        void set(Variable var, TruthValue value);
+    };
 
     /**
      * @brief Main solver class
      */
     class Solver {
         // @TODO private members here
+        Assignments assignments;
+        std::vector<Clause> clauses;
     public:
 
         /**
