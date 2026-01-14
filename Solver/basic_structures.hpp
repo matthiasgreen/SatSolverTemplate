@@ -18,7 +18,7 @@ namespace sat {
      * @brief Represents a truth value
      */
     enum class TruthValue {
-        False = -1, ///< variable is true
+        False = -1, ///< variable is false
         Undefined = 0, ///< variable is unassigned
         True = 1 ///< variable is true
     };
