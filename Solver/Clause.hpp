@@ -8,6 +8,9 @@
 #ifndef CLAUSE_HPP
 #define CLAUSE_HPP
 
+#include <cstddef>
+#include <map>
+#include <optional>
 #include <vector>
 #include <ostream>
 
@@ -35,6 +38,8 @@ namespace sat {
      */
     class Clause {
         // @TODO Private members here
+        std::vector<Literal> literals;
+        std::optional<size_t> watchers[2];
     public:
 
         /**
