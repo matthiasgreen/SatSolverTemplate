@@ -7,6 +7,7 @@
 #include "Solver.hpp"
 #include "Clause.hpp"
 #include "basic_structures.hpp"
+#include "printing.hpp"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -44,6 +45,102 @@ bool Solver::addClause(Clause clause) {
         clauses.push_back(clause);
     }
     return true;
+}
+
+TruthValue Solver::val(Variable x) const { return assignments[x]; }
+
+bool Solver::satisfied(Literal l) const {
+    return l.sign() == (short)assignments[var(l)];
+}
+
+bool Solver::falsified(Literal l) const {
+    return -1 * l.sign() == (short)assignments[var(l)];
+}
+
+bool Solver::assign(Literal l) {
+    if (falsified(l)) {
+        return false;
+    }
+    unitLiterals.push_back(l);
+    assignments.set(var(l), (TruthValue)l.sign());
+    return true;
+}
+
+bool Solver::unitPropagate() {
+    size_t i = 0;
+    while (i < unitLiterals.size()) {
+        auto l = unitLiterals[i].negate();
+        if (!unitPropagate(l)) {
+            return false;
+        }
+        i++;
+    }
+    return true;
+}
+
+bool Solver::unitPropagate(Literal l) {
+    size_t watchListIndex = 0;
+    while (watchListIndex < watchLists[l.get()].size()) {
+
+        auto clauseIndex = watchLists[l.get()][watchListIndex];
+        auto &c = clauses[clauseIndex];
+
+        // std::cout << "Clause and literal: " << c << "  " << l << "\n";
+        // std::cout << c.getWatcherByRank(0) << c.getWatcherByRank(1) << "\n";
+        // std::cout << "Watchlist: " << watchLists[l.get()] << "\n";
+        // std::cout << "Clauses: " << clauses << "\n";
+        // std::cout << "\n";
+
+        auto rank = c.getRank(l);
+        assert(rank != -1);
+        auto start = c.getIndex(rank);
+        auto i = start;
+        auto p = c.getWatcherByRank(1 - rank);
+        if (!satisfied(p)) {
+            while (true) {
+                i++;
+                if (i == c.size()) {
+                    i = 0;
+                }
+                if (i == start) {
+                    break;
+                }
+                auto ci = c[i];
+                if (ci != p && !falsified(ci)) {
+                    auto old_lit = set_watcher(clauseIndex, ci, rank);
+                    if (old_lit == l) {
+                        watchListIndex--;
+                    }
+                    break;
+                }
+            }
+            if (i == start) {
+                if (!assign(p)) {
+                    return false;
+                }
+            }
+        }
+        watchListIndex++;
+    }
+    return true;
+}
+
+Literal Solver::set_watcher(size_t clause_index, Literal l, short rank) {
+    assert(rank == 0 || rank == 1);
+
+    auto &c = clauses[clause_index];
+    auto old_literal = c.getWatcherByRank(rank);
+    auto &watchList = watchLists[old_literal.get()];
+
+    watchList.erase(
+        std::remove(watchList.begin(), watchList.end(), clause_index),
+        watchList.end());
+
+    watchLists[l.get()].push_back(clause_index);
+
+    assert(c.setWatcher(l, rank));
+
+    return old_literal;
 }
 
 /**
@@ -104,83 +201,5 @@ auto Solver::rebase() const -> std::vector<Clause> {
 
     return reducedClauses;
 }
-
-TruthValue Solver::val(Variable x) const { return assignments[x]; }
-
-bool Solver::satisfied(Literal l) const {
-    return l.sign() == (short)assignments[var(l)];
-}
-
-bool Solver::falsified(Literal l) const {
-    return -1 * l.sign() == (short)assignments[var(l)];
-}
-
-bool Solver::assign(Literal l) {
-    if (falsified(l)) {
-        return false;
-    }
-    unitLiterals.push_back(l);
-    assignments.set(var(l), (TruthValue)l.sign());
-    return true;
-}
-
-bool Solver::unitPropagate() {
-    size_t i = 0;
-    while (i < unitLiterals.size()) {
-        auto l = unitLiterals[i].negate();
-        if (!unitPropagate(l)) {
-            return false;
-        }
-        i++;
-    }
-    return true;
-}
-
-bool Solver::unitPropagate(Literal l) {
-    for (auto clause_index : watchLists[l.get()]) {
-        auto &c = clauses[clause_index];
-        auto rank = c.getRank(l);
-        assert(rank != -1);
-        auto start = c.getIndex(rank);
-        auto i = start;
-        auto p = c.getWatcherByRank(1 - rank);
-        if (!satisfied(p)) {
-            while (true) {
-                i++;
-                if (i == c.size()) {
-                    i = 0;
-                }
-                if (i == start) {
-                    break;
-                }
-                auto ci = c[i];
-                if (ci != p && !falsified(ci)) {
-                    set_watcher(clause_index, ci, rank);
-                    break;
-                }
-            }
-            if (i == start) {
-                if (!assign(p)) {
-                    return false;
-                }
-            }
-        }
-    }
-    return true;
-}
-
-void Solver::set_watcher(size_t clause_index, Literal l, short rank) {
-    auto &c = clauses[clause_index];
-    auto old_literal = c.getWatcherByRank(rank);
-    auto &watchList = watchLists[old_literal.get()];
-    assert(std::find(watchList.begin(), watchList.end(), clause_index) != watchList.end());
-    watchList.erase(
-        std::remove(watchList.begin(), watchList.end(), clause_index),
-        watchList.end());
-    assert(std::find(watchList.begin(), watchList.end(), clause_index) == watchList.end());
-    watchLists[l.get()].push_back(clause_index);
-    c.setWatcher(l, rank);
-}
-
 
 } // namespace sat

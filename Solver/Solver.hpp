@@ -117,7 +117,8 @@ class Solver {
 
     bool unitPropagate(Literal l);
 
-    void set_watcher(size_t clause_index, Literal ci, short rank);
+    // Returns watched literal that was replaced
+    Literal set_watcher(size_t clause_index, Literal ci, short rank);
 };
 } // namespace sat
 
