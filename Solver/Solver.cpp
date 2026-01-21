@@ -15,6 +15,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include "heuristics.hpp"
 
 namespace sat {
 
@@ -29,6 +30,7 @@ TruthValue Assignments::operator[](Variable var) const {
 void Assignments::set(Variable var, TruthValue value) {
     assignments[size_t(var.get())] = value;
 }
+
 
 Solver::Solver(unsigned numVariables) : assignments(numVariables) {}
 
@@ -200,6 +202,31 @@ auto Solver::rebase() const -> std::vector<Clause> {
     }
 
     return reducedClauses;
+}
+
+bool Solver::dpll(unsigned n) {
+    while (true) {
+        if (unitPropagate()) {
+            if (unitLiterals.size() == n) {
+                return true;
+            }
+            trail.push_back(unitLiterals.size());
+            assign(pos(FirstVariable()(assignments.assignments, assignments.assignments.size())));
+        } else {
+            if (trail.size() == 0) {
+                return false;
+            }
+            auto d = unitLiterals[trail.back()];
+            while (unitLiterals.size() > trail.back()) {
+                auto l = unitLiterals.back();
+                assignments.set(var(l), TruthValue::Undefined);
+                unitLiterals.pop_back();
+            }
+            auto toPropagate = trail.back();
+            trail.pop_back();
+            assert(assign(d.negate()));
+        }
+    }
 }
 
 } // namespace sat

@@ -28,9 +28,9 @@ using ClausePointer = std::shared_ptr<Clause>;
 using ConstClausePointer = std::shared_ptr<const Clause>;
 
 class Assignments {
-    std::vector<TruthValue> assignments;
 
   public:
+    std::vector<TruthValue> assignments;
     Assignments(unsigned numVariables);
     TruthValue operator[](Variable var) const;
     void set(Variable var, TruthValue value);
@@ -46,6 +46,7 @@ class Solver {
     std::vector<Literal> unitLiterals;
     // Maps literal value to clauses index
     std::unordered_map<unsigned, std::vector<size_t>> watchLists;
+    std::vector<size_t> trail;
 
   public:
     /**
@@ -119,6 +120,8 @@ class Solver {
 
     // Returns watched literal that was replaced
     Literal set_watcher(size_t clause_index, Literal ci, short rank);
+
+    bool dpll(unsigned);
 };
 } // namespace sat
 
