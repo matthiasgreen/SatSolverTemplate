@@ -36,16 +36,13 @@ short Clause::getRank(Literal l) const {
 }
 
 std::size_t Clause::getIndex(short rank) const {
-    if (rank < 0 || rank > 1) {
-        throw -1;
-    }
+    assert(rank == 0 || rank == 1);
     return watchers[rank];
 }
 
 bool Clause::setWatcher(Literal l, short watcherNo) {
-    if (watcherNo < 0 || watcherNo > 1) {
-        throw -1;
-    }
+    assert(watcherNo == 0 || watcherNo == 1);
+
     for (unsigned i = 0; i < literals.size(); i++) {
         if (literals[i] == l) {
             watchers[watcherNo] = i;
@@ -70,9 +67,7 @@ Literal Clause::operator[](std::size_t index) const { return literals[index]; }
 std::size_t Clause::size() const { return literals.size(); }
 
 Literal Clause::getWatcherByRank(short rank) const {
-    if (rank < 0 || rank > 1) {
-        throw -1;
-    }
+    assert(rank == 0 || rank == 1);
     return literals[watchers[rank]];
 }
 

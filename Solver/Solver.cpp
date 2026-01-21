@@ -8,7 +8,9 @@
 #include "Clause.hpp"
 #include "basic_structures.hpp"
 #include <algorithm>
+#include <cassert>
 #include <cstddef>
+#include <iostream>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -33,11 +35,9 @@ bool Solver::addClause(Clause clause) {
     if (clause.isEmpty()) {
         return false;
     } else if (clause.size() == 1) {
-        auto literal = clause[0];
-        if (falsified(literal)) {
+        if (!assign(clause[0])) {
             return false;
         }
-        unitLiterals.push_back(clause[0]);
     } else {
         watchLists[clause.getWatcherByRank(0).get()].push_back(clauses.size());
         watchLists[clause.getWatcherByRank(1).get()].push_back(clauses.size());
@@ -140,6 +140,7 @@ bool Solver::unitPropagate(Literal l) {
     for (auto clause_index : watchLists[l.get()]) {
         auto &c = clauses[clause_index];
         auto rank = c.getRank(l);
+        assert(rank != -1);
         auto start = c.getIndex(rank);
         auto i = start;
         auto p = c.getWatcherByRank(1 - rank);
@@ -168,15 +169,17 @@ bool Solver::unitPropagate(Literal l) {
     return true;
 }
 
-void Solver::set_watcher(size_t clause_index, Literal ci, short rank) {
+void Solver::set_watcher(size_t clause_index, Literal l, short rank) {
     auto &c = clauses[clause_index];
     auto old_literal = c.getWatcherByRank(rank);
     auto &watchList = watchLists[old_literal.get()];
+    assert(std::find(watchList.begin(), watchList.end(), clause_index) != watchList.end());
     watchList.erase(
         std::remove(watchList.begin(), watchList.end(), clause_index),
         watchList.end());
-    watchLists[ci.get()].push_back(clause_index);
-    c.setWatcher(ci, rank);
+    assert(std::find(watchList.begin(), watchList.end(), clause_index) == watchList.end());
+    watchLists[l.get()].push_back(clause_index);
+    c.setWatcher(l, rank);
 }
 
 
