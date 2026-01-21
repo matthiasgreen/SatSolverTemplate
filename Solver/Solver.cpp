@@ -7,11 +7,11 @@
 #include "Solver.hpp"
 #include "Clause.hpp"
 #include "basic_structures.hpp"
+#include <algorithm>
 #include <cstddef>
 #include <memory>
 #include <utility>
 #include <vector>
-#include <algorithm>
 
 namespace sat {
 
@@ -39,8 +39,8 @@ bool Solver::addClause(Clause clause) {
         }
         unitLiterals.push_back(clause[0]);
     } else {
-        watchLists[clause.getWatcherByRank(0).get()].push_back(std::shared_ptr<Clause>(&clause));
-        watchLists[clause.getWatcherByRank(1).get()].push_back(std::shared_ptr<Clause>(&clause));
+        watchLists[clause.getWatcherByRank(0).get()].push_back(clauses.size());
+        watchLists[clause.getWatcherByRank(1).get()].push_back(clauses.size());
         clauses.push_back(clause);
     }
     return true;
@@ -137,29 +137,25 @@ bool Solver::unitPropagate() {
 }
 
 bool Solver::unitPropagate(Literal l) {
-    for (auto c: watchLists[l.get()]) {
-        auto rank = c->getRank(l);
-        auto start = c->getIndex(rank);
+    for (auto clause_index : watchLists[l.get()]) {
+        auto &c = clauses[clause_index];
+        auto rank = c.getRank(l);
+        auto start = c.getIndex(rank);
         auto i = start;
-        auto p = c->getWatcherByRank(1-rank);
+        auto p = c.getWatcherByRank(1 - rank);
         if (!satisfied(p)) {
             while (true) {
                 i++;
-                if (i == c->size()) {
+                if (i == c.size()) {
                     i = 0;
                 }
                 if (i == start) {
                     break;
                 }
-                auto ci = (*c)[i];
-                if (ci != p) {
-                    if (!falsified(ci)) {
-                        auto &watchList = watchLists[l.get()];
-                        watchList.erase(std::remove(watchList.begin(), watchList.end(), c), watchList.end());
-                        watchLists[ci.get()].push_back(c);
-                        c->setWatcher(ci, rank);
-                        break;
-                    }
+                auto ci = c[i];
+                if (ci != p && !falsified(ci)) {
+                    set_watcher(clause_index, ci, rank);
+                    break;
                 }
             }
             if (i == start) {
@@ -171,5 +167,17 @@ bool Solver::unitPropagate(Literal l) {
     }
     return true;
 }
+
+void Solver::set_watcher(size_t clause_index, Literal ci, short rank) {
+    auto &c = clauses[clause_index];
+    auto old_literal = c.getWatcherByRank(rank);
+    auto &watchList = watchLists[old_literal.get()];
+    watchList.erase(
+        std::remove(watchList.begin(), watchList.end(), clause_index),
+        watchList.end());
+    watchLists[ci.get()].push_back(clause_index);
+    c.setWatcher(ci, rank);
+}
+
 
 } // namespace sat

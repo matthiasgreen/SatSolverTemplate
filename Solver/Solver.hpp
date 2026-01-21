@@ -44,8 +44,8 @@ class Solver {
     Assignments assignments;
     std::vector<Clause> clauses;
     std::vector<Literal> unitLiterals;
-    // Maps literal value to clauses
-    std::unordered_map<unsigned, std::vector<ClausePointer>> watchLists;
+    // Maps literal value to clauses index
+    std::unordered_map<unsigned, std::vector<size_t>> watchLists;
 
   public:
     /**
@@ -116,6 +116,8 @@ class Solver {
     bool unitPropagate();
 
     bool unitPropagate(Literal l);
+
+    void set_watcher(size_t clause_index, Literal ci, short rank);
 };
 } // namespace sat
 
