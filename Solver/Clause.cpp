@@ -7,22 +7,28 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
-#include <optional>
 #include <vector>
 
 #include "Clause.hpp"
 #include "basic_structures.hpp"
-#include "util/exception.hpp"
 
 namespace sat {
 // TODO implementation here
 
-Clause::Clause(std::vector<Literal> literals) { this->literals = literals; }
+Clause::Clause(std::vector<Literal> literals) {
+    this->literals = literals;
+    watchers[0] = 0;
+    if (literals.size() >= 2) {
+       watchers[1] = 1;
+    } else {
+        watchers[1] = 0;
+    }
+}
 
 short Clause::getRank(Literal l) const {
-    if (watchers[0].has_value() && literals[watchers[0].value()] == l) {
+    if (literals[watchers[0]] == l) {
         return 0;
-    } else if (watchers[1].has_value() && literals[watchers[1].value()] == l) {
+    } else if (literals[watchers[1]] == l) {
         return 1;
     } else {
         return -1;
@@ -33,12 +39,7 @@ std::size_t Clause::getIndex(short rank) const {
     if (rank < 0 || rank > 1) {
         throw -1;
     }
-    std::optional<size_t> watcher = watchers[rank];
-    if (watcher.has_value()) {
-        return watcher.value();
-    } else {
-        throw -1;
-    }
+    return watchers[rank];
 }
 
 bool Clause::setWatcher(Literal l, short watcherNo) {
@@ -72,10 +73,7 @@ Literal Clause::getWatcherByRank(short rank) const {
     if (rank < 0 || rank > 1) {
         throw -1;
     }
-    if (watchers[rank].has_value()) {
-        return literals[watchers[rank].value()];
-    }
-    throw -1;
+    return literals[watchers[rank]];
 }
 
 bool Clause::sameLiterals(const Clause &other) const {
