@@ -8,7 +8,6 @@
 #include "util/exception.hpp"
 
 namespace sat {
-    // @TODO implementation here
 
 
     Variable::Variable(unsigned val) {

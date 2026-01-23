@@ -9,7 +9,6 @@
 #define BASIC_STRUCTURES_HPP
 
 /* These are only the declarations of the classes and their members
- * @TODO implementation in basic_structures.cpp
  */
 
 namespace sat {
@@ -27,7 +26,6 @@ namespace sat {
      * @brief Structure representing a binary variable in a CNF-SAT problem
      */
     class  Variable {
-        //@TODO Private members here
         unsigned id;
     public:
         /**
@@ -55,7 +53,6 @@ namespace sat {
      * A literal of variable x is either x or ¬x
      */
     class Literal {
-        //@TODO Private members here
         unsigned id;
     public:
         /**

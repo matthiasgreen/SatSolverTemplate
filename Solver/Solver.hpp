@@ -40,7 +40,6 @@ class Assignments {
  * @brief Main solver class
  */
 class Solver {
-    // @TODO private members here
     Assignments assignments;
     std::vector<Clause> clauses;
     std::vector<Literal> unitLiterals;
@@ -57,9 +56,6 @@ class Solver {
      */
     explicit Solver(unsigned numVariables);
 
-    /*
-     * @TODO if you want, you can declare additional constructors here
-     */
 
     /*
      * You can design the interface of your solver as you want. You can for

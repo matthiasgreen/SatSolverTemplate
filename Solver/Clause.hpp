@@ -37,7 +37,6 @@ namespace sat {
      * std::vector<Literal>::begin() and end() respectively
      */
     class Clause {
-        // @TODO Private members here
         std::vector<Literal> literals;
         size_t watchers[2];
     public:
@@ -50,15 +49,9 @@ namespace sat {
         /**
          * CTor
          * @param literals list of literals of the clause
-         * @TODO The tests require a single argument constructor. But you can add more arguments with default values
-         * @TODO (for example a flag that tells the constructor if the literals are already sorted)
-         * @TODO or even further constructors if you want.
          */
         Clause(std::vector<Literal> literals);
 
-        /*
-         * @TODO if you want, you can declare additional constructors here
-         */
 
 
         /**
@@ -137,8 +130,6 @@ namespace sat {
          * Whether the other clause contains the same literals (independent of ordering)
          * @param other clause to compare to
          * @return true if both clauses contain exactly the same literals.
-         * @TODO for your implementation you need to either sort the literals or implement your own logic for the order
-         * @TODO independent comparison
          */
          bool sameLiterals(const Clause &other) const;
 

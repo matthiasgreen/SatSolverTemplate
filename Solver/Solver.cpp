@@ -211,7 +211,7 @@ bool Solver::dpll(unsigned n) {
                 return true;
             }
             trail.push_back(unitLiterals.size());
-            assign(pos(FirstVariable()(assignments.assignments, assignments.assignments.size())));
+            assert(assign(pos(FirstVariable()(assignments.assignments, assignments.assignments.size()))));
         } else {
             if (trail.size() == 0) {
                 return false;

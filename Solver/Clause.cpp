@@ -13,7 +13,6 @@
 #include "basic_structures.hpp"
 
 namespace sat {
-// TODO implementation here
 
 Clause::Clause(std::vector<Literal> literals) {
     // assert(literals.size() > 0);
