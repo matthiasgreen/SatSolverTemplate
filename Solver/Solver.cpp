@@ -82,12 +82,6 @@ bool Solver::unitPropagate(Literal l) {
         auto clauseIndex = watchLists[l.get()][watchListIndex];
         auto &c = clauses[clauseIndex];
 
-        // std::cout << "Clause and literal: " << c << "  " << l << "\n";
-        // std::cout << c.getWatcherByRank(0) << c.getWatcherByRank(1) << "\n";
-        // std::cout << "Watchlist: " << watchLists[l.get()] << "\n";
-        // std::cout << "Clauses: " << clauses << "\n";
-        // std::cout << "\n";
-
         auto rank = c.getRank(l);
         assert(rank != -1);
         auto start = c.getIndex(rank);

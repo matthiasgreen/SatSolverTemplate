@@ -15,7 +15,6 @@
 namespace sat {
 
 Clause::Clause(std::vector<Literal> literals) {
-    // assert(literals.size() > 0);
     this->literals = literals;
     watchers[0] = 0;
     if (literals.size() >= 2) {
