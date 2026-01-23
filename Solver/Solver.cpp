@@ -7,15 +7,12 @@
 #include "Solver.hpp"
 #include "Clause.hpp"
 #include "basic_structures.hpp"
-#include "printing.hpp"
+#include "heuristics.hpp"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
-#include <iostream>
-#include <memory>
 #include <utility>
 #include <vector>
-#include "heuristics.hpp"
 
 namespace sat {
 
@@ -30,7 +27,6 @@ TruthValue Assignments::operator[](Variable var) const {
 void Assignments::set(Variable var, TruthValue value) {
     assignments[size_t(var.get())] = value;
 }
-
 
 Solver::Solver(unsigned numVariables) : assignments(numVariables) {}
 
@@ -81,8 +77,7 @@ bool Solver::unitPropagate() {
 }
 
 bool Solver::unitPropagate(Literal l) {
-    size_t watchListIndex = 0;
-    while (watchListIndex < watchLists[l.get()].size()) {
+    for (size_t watchListIndex = 0; watchListIndex < watchLists[l.get()].size(); watchListIndex++) {
 
         auto clauseIndex = watchLists[l.get()][watchListIndex];
         auto &c = clauses[clauseIndex];
@@ -116,13 +111,10 @@ bool Solver::unitPropagate(Literal l) {
                     break;
                 }
             }
-            if (i == start) {
-                if (!assign(p)) {
-                    return false;
-                }
+            if (i == start && !assign(p)) {
+                return false;
             }
         }
-        watchListIndex++;
     }
     return true;
 }
@@ -211,7 +203,8 @@ bool Solver::dpll(unsigned n) {
                 return true;
             }
             trail.push_back(unitLiterals.size());
-            assert(assign(pos(FirstVariable()(assignments.assignments, assignments.assignments.size()))));
+            assert(assign(pos(FirstVariable()(
+                assignments.assignments, assignments.assignments.size()))));
         } else {
             if (trail.size() == 0) {
                 return false;
